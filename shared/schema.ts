@@ -8,6 +8,7 @@ export const cases = pgTable("cases", {
   title: text("title").notNull(),
   contactMode: text("contact_mode").notNull(),
   contact: text("contact").notNull(),
+  learnerName: text("learner_name").notNull(),
   assignedTo: text("assigned_to").notNull(),
   status: text("status").notNull().default("active"),
   assignmentGroup: text("assignment_group").notNull(),
@@ -17,6 +18,14 @@ export const cases = pgTable("cases", {
   openDateTime: timestamp("open_date_time").notNull().defaultNow(),
   resolvedDateTime: timestamp("resolved_date_time"),
   modifiedOn: timestamp("modified_on").notNull().defaultNow(),
+});
+
+export const conversations = pgTable("conversations", {
+  id: serial("id").primaryKey(),
+  caseId: integer("case_id").notNull(),
+  sender: text("sender").notNull(),
+  message: text("message").notNull(),
+  timestamp: timestamp("timestamp").notNull().defaultNow(),
 });
 
 export const surveys = pgTable("surveys", {
@@ -39,6 +48,11 @@ export const insertCaseSchema = createInsertSchema(cases).omit({
   modifiedOn: true
 });
 
+export const insertConversationSchema = createInsertSchema(conversations).omit({ 
+  id: true,
+  timestamp: true
+});
+
 export const insertSurveySchema = createInsertSchema(surveys).omit({ 
   id: true 
 });
@@ -49,6 +63,9 @@ export const insertKnowledgeArticleSchema = createInsertSchema(knowledgeArticles
 
 export type Case = typeof cases.$inferSelect;
 export type InsertCase = z.infer<typeof insertCaseSchema>;
+
+export type Conversation = typeof conversations.$inferSelect;
+export type InsertConversation = z.infer<typeof insertConversationSchema>;
 
 export type Survey = typeof surveys.$inferSelect;
 export type InsertSurvey = z.infer<typeof insertSurveySchema>;

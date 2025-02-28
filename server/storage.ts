@@ -2,10 +2,11 @@ import {
   Case, InsertCase,
   Survey, InsertSurvey,
   KnowledgeArticle, InsertKnowledgeArticle,
-  cases, surveys, knowledgeArticles
+  Conversation, InsertConversation,
+  cases, surveys, knowledgeArticles, conversations
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, ilike } from "drizzle-orm";
+import { eq, ilike, desc } from "drizzle-orm";
 
 export interface IStorage {
   // Cases
@@ -13,6 +14,10 @@ export interface IStorage {
   getCase(id: number): Promise<Case | undefined>;
   createCase(data: InsertCase): Promise<Case>;
   updateCase(id: number, data: Partial<InsertCase>): Promise<Case>;
+
+  // Conversations
+  getConversations(caseId: number): Promise<Conversation[]>;
+  createConversation(data: InsertConversation): Promise<Conversation>;
 
   // Surveys
   getSurveys(): Promise<Survey[]>;
@@ -57,6 +62,22 @@ export class DatabaseStorage implements IStorage {
     return updatedCase;
   }
 
+  async getConversations(caseId: number): Promise<Conversation[]> {
+    return await db
+      .select()
+      .from(conversations)
+      .where(eq(conversations.caseId, caseId))
+      .orderBy(desc(conversations.timestamp));
+  }
+
+  async createConversation(data: InsertConversation): Promise<Conversation> {
+    const [conversation] = await db
+      .insert(conversations)
+      .values(data)
+      .returning();
+    return conversation;
+  }
+
   async getSurveys(): Promise<Survey[]> {
     return await db.select().from(surveys);
   }
@@ -79,14 +100,9 @@ export class DatabaseStorage implements IStorage {
     return await db
       .select()
       .from(knowledgeArticles)
-      .where(
-        ilike(knowledgeArticles.title, `%${query}%`)
-      )
-      .or(
-        ilike(knowledgeArticles.content, `%${query}%`)
-      );
+      .where(ilike(knowledgeArticles.title, `%${query}%`))
+      .or(ilike(knowledgeArticles.content, `%${query}%`));
   }
 }
 
-// Replace MemStorage with DatabaseStorage
 export const storage = new DatabaseStorage();

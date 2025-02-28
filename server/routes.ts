@@ -1,7 +1,12 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertCaseSchema, insertSurveySchema, insertKnowledgeArticleSchema } from "@shared/schema";
+import { 
+  insertCaseSchema, 
+  insertSurveySchema, 
+  insertKnowledgeArticleSchema,
+  insertConversationSchema 
+} from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Cases endpoints
@@ -38,6 +43,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       res.status(404).json({ message: "Case not found" });
     }
+  });
+
+  // Conversations endpoints
+  app.get("/api/cases/:id/conversations", async (req, res) => {
+    const conversations = await storage.getConversations(parseInt(req.params.id));
+    res.json(conversations);
+  });
+
+  app.post("/api/cases/:id/conversations", async (req, res) => {
+    const result = insertConversationSchema.safeParse({
+      ...req.body,
+      caseId: parseInt(req.params.id)
+    });
+    if (!result.success) {
+      return res.status(400).json({ errors: result.error.errors });
+    }
+    const newConversation = await storage.createConversation(result.data);
+    res.status(201).json(newConversation);
   });
 
   // Surveys endpoints
