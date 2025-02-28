@@ -1,6 +1,38 @@
+# Dependencies
 node_modules
+package-lock.json
+
+# Build outputs
 dist
-.DS_Store
+build
 server/public
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE and Editor files
+.vscode
+.idea
+*.swp
+*.swo
+.DS_Store
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Vite
 vite.config.ts.*
+*.timestamp-*
+
+# Database
+*.sqlite
+*.db
+
+# Misc
+*.log
 *.tar.gz
+.cache
