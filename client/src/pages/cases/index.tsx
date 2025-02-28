@@ -27,52 +27,54 @@ export default function CasesPage() {
   });
 
   if (isLoading) {
-    return <div className="p-8">Loading cases...</div>;
+    return <div className="p-4 md:p-8">Loading cases...</div>;
   }
 
   return (
-    <div className="p-8">
-      <h1 className="text-4xl font-bold mb-8">Cases</h1>
-      
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Case Number</TableHead>
-              <TableHead>Title</TableHead>
-              <TableHead>Contact</TableHead>
-              <TableHead>Assigned To</TableHead>
-              <TableHead>First Response SLA</TableHead>
-              <TableHead>Resolved By SLA</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Open Date</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {cases?.map((case_) => (
-              <TableRow key={case_.id}>
-                <TableCell>{case_.caseNumber}</TableCell>
-                <TableCell>{case_.title}</TableCell>
-                <TableCell>{case_.contact}</TableCell>
-                <TableCell>{case_.assignedTo}</TableCell>
-                <TableCell>
-                  <SLABadge status={case_.firstResponseSLA} />
-                </TableCell>
-                <TableCell>
-                  <SLABadge status={case_.resolvedBySLA} />
-                </TableCell>
-                <TableCell>
-                  <Badge variant={case_.status === "active" ? "default" : "secondary"}>
-                    {case_.status}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  {format(new Date(case_.openDateTime), "MMM d, yyyy")}
-                </TableCell>
+    <div className="p-4 md:p-8">
+      <h1 className="text-3xl md:text-4xl font-bold mb-6 md:mb-8">Cases</h1>
+
+      <div className="overflow-x-auto rounded-md border">
+        <div className="min-w-[1000px]">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Case Number</TableHead>
+                <TableHead>Title</TableHead>
+                <TableHead>Contact</TableHead>
+                <TableHead>Assigned To</TableHead>
+                <TableHead>First Response SLA</TableHead>
+                <TableHead>Resolved By SLA</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Open Date</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {cases?.map((case_) => (
+                <TableRow key={case_.id}>
+                  <TableCell>{case_.caseNumber}</TableCell>
+                  <TableCell>{case_.title}</TableCell>
+                  <TableCell>{case_.contact}</TableCell>
+                  <TableCell>{case_.assignedTo}</TableCell>
+                  <TableCell>
+                    <SLABadge status={case_.firstResponseSLA} />
+                  </TableCell>
+                  <TableCell>
+                    <SLABadge status={case_.resolvedBySLA} />
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant={case_.status === "active" ? "default" : "secondary"}>
+                      {case_.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    {format(new Date(case_.openDateTime), "MMM d, yyyy")}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </div>
     </div>
   );
