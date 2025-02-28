@@ -9,30 +9,22 @@ import CasesPage from "@/pages/cases";
 import SurveysPage from "@/pages/surveys";
 import KnowledgePage from "@/pages/knowledge";
 
-function Router() {
-  return (
-    <div className="flex min-h-screen">
-      <Sidebar />
-      <main className="flex-1 md:ml-64">
-        <Switch>
-          <Route path="/" component={Home} />
-          <Route path="/cases" component={CasesPage} />
-          <Route path="/surveys" component={SurveysPage} />
-          <Route path="/knowledge" component={KnowledgePage} />
-          <Route component={NotFound} />
-        </Switch>
-      </main>
-    </div>
-  );
-}
-
-function App() {
+export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <Router />
+      <div className="flex min-h-screen">
+        <Sidebar />
+        <main className="flex-1 md:ml-64">
+          <Switch>
+            <Route path="/" component={Home} />
+            <Route path="/cases" component={CasesPage} />
+            <Route path="/surveys" component={SurveysPage} />
+            <Route path="/knowledge" component={KnowledgePage} />
+            <Route component={NotFound} />
+          </Switch>
+        </main>
+      </div>
       <Toaster />
     </QueryClientProvider>
   );
 }
-
-export default App;

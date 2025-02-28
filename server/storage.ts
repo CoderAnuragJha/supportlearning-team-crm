@@ -1,8 +1,11 @@
 import { 
   Case, InsertCase,
   Survey, InsertSurvey,
-  KnowledgeArticle, InsertKnowledgeArticle
+  KnowledgeArticle, InsertKnowledgeArticle,
+  cases, surveys, knowledgeArticles
 } from "@shared/schema";
+import { db } from "./db";
+import { eq, ilike } from "drizzle-orm";
 
 export interface IStorage {
   // Cases
@@ -10,129 +13,80 @@ export interface IStorage {
   getCase(id: number): Promise<Case | undefined>;
   createCase(data: InsertCase): Promise<Case>;
   updateCase(id: number, data: Partial<InsertCase>): Promise<Case>;
-  
+
   // Surveys
   getSurveys(): Promise<Survey[]>;
   createSurvey(data: InsertSurvey): Promise<Survey>;
-  
+
   // Knowledge Articles
   getKnowledgeArticles(): Promise<KnowledgeArticle[]>;
   createKnowledgeArticle(data: InsertKnowledgeArticle): Promise<KnowledgeArticle>;
   searchKnowledgeArticles(query: string): Promise<KnowledgeArticle[]>;
 }
 
-export class MemStorage implements IStorage {
-  private cases: Map<number, Case>;
-  private surveys: Map<number, Survey>;
-  private knowledgeArticles: Map<number, KnowledgeArticle>;
-  private currentIds: { cases: number; surveys: number; articles: number };
-
-  constructor() {
-    this.cases = new Map();
-    this.surveys = new Map();
-    this.knowledgeArticles = new Map();
-    this.currentIds = { cases: 1, surveys: 1, articles: 1 };
-
-    // Add some sample data
-    this.initializeSampleData();
-  }
-
-  private initializeSampleData() {
-    const sampleCase: InsertCase = {
-      caseNumber: "CS001",
-      title: "Course Access Issue",
-      contactMode: "Email",
-      contact: "john.doe@example.com",
-      assignedTo: "Sarah Support",
-      status: "active",
-      assignmentGroup: "Technical Support",
-      queryCategory: "Access",
-      firstResponseSLA: "Met",
-      resolvedBySLA: "Pending"
-    };
-    this.createCase(sampleCase);
-
-    const sampleSurvey: InsertSurvey = {
-      caseId: 1,
-      rating: 5,
-      comments: "Great support, quick resolution!"
-    };
-    this.createSurvey(sampleSurvey);
-
-    const sampleArticle: InsertKnowledgeArticle = {
-      title: "Common Login Issues",
-      content: "Step by step guide to resolve login issues...",
-      category: "Authentication"
-    };
-    this.createKnowledgeArticle(sampleArticle);
-  }
-
+export class DatabaseStorage implements IStorage {
   async getCases(): Promise<Case[]> {
-    return Array.from(this.cases.values());
+    return await db.select().from(cases);
   }
 
   async getCase(id: number): Promise<Case | undefined> {
-    return this.cases.get(id);
+    const [caseItem] = await db.select().from(cases).where(eq(cases.id, id));
+    return caseItem;
   }
 
   async createCase(data: InsertCase): Promise<Case> {
-    const id = this.currentIds.cases++;
-    const now = new Date();
-    const newCase: Case = {
+    const [newCase] = await db.insert(cases).values({
       ...data,
-      id,
-      openDateTime: now,
-      modifiedOn: now,
-      resolvedDateTime: null
-    };
-    this.cases.set(id, newCase);
+      openDateTime: new Date(),
+      modifiedOn: new Date()
+    }).returning();
     return newCase;
   }
 
   async updateCase(id: number, data: Partial<InsertCase>): Promise<Case> {
-    const existingCase = await this.getCase(id);
-    if (!existingCase) {
+    const [updatedCase] = await db
+      .update(cases)
+      .set({ ...data, modifiedOn: new Date() })
+      .where(eq(cases.id, id))
+      .returning();
+
+    if (!updatedCase) {
       throw new Error("Case not found");
     }
-    const updatedCase: Case = {
-      ...existingCase,
-      ...data,
-      modifiedOn: new Date()
-    };
-    this.cases.set(id, updatedCase);
+
     return updatedCase;
   }
 
   async getSurveys(): Promise<Survey[]> {
-    return Array.from(this.surveys.values());
+    return await db.select().from(surveys);
   }
 
   async createSurvey(data: InsertSurvey): Promise<Survey> {
-    const id = this.currentIds.surveys++;
-    const survey: Survey = { ...data, id };
-    this.surveys.set(id, survey);
+    const [survey] = await db.insert(surveys).values(data).returning();
     return survey;
   }
 
   async getKnowledgeArticles(): Promise<KnowledgeArticle[]> {
-    return Array.from(this.knowledgeArticles.values());
+    return await db.select().from(knowledgeArticles);
   }
 
   async createKnowledgeArticle(data: InsertKnowledgeArticle): Promise<KnowledgeArticle> {
-    const id = this.currentIds.articles++;
-    const article: KnowledgeArticle = { ...data, id };
-    this.knowledgeArticles.set(id, article);
+    const [article] = await db.insert(knowledgeArticles).values(data).returning();
     return article;
   }
 
   async searchKnowledgeArticles(query: string): Promise<KnowledgeArticle[]> {
-    const articles = await this.getKnowledgeArticles();
-    const searchTerm = query.toLowerCase();
-    return articles.filter(article => 
-      article.title.toLowerCase().includes(searchTerm) ||
-      article.content.toLowerCase().includes(searchTerm)
-    );
+    return await db
+      .select()
+      .from(knowledgeArticles)
+      .where(
+        ilike(knowledgeArticles.title, `%${query}%`)
+      )
+      .or(
+        ilike(knowledgeArticles.content, `%${query}%`)
+      );
   }
 }
 
-export const storage = new MemStorage();
+// Replace MemStorage with DatabaseStorage
+export const storage = new DatabaseStorage();
