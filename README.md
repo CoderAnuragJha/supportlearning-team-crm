@@ -25,7 +25,7 @@ A comprehensive Customer Relationship Management (CRM) system designed for learn
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/supportlearning-team-crm.git
+   git clone git@github.com:CoderAnuragJha/supportlearning-team-crm.git
    cd supportlearning-team-crm
    ```
 
@@ -35,7 +35,7 @@ A comprehensive Customer Relationship Management (CRM) system designed for learn
    ```
 
 3. Set up environment variables:
-   Create a `.env` file with the following:
+   Create a `.env` file based on `.env.example`:
    ```
    DATABASE_URL=your_postgresql_connection_string
    ```
@@ -66,6 +66,27 @@ A comprehensive Customer Relationship Management (CRM) system designed for learn
 └── shared/
     └── schema.ts         # Shared types and database schema
 ```
+
+## API Endpoints
+
+### Cases
+- `GET /api/cases` - Get all cases
+- `GET /api/cases/:id` - Get a specific case
+- `POST /api/cases` - Create a new case
+- `PATCH /api/cases/:id` - Update a case
+
+### Conversations
+- `GET /api/cases/:id/conversations` - Get conversations for a case
+- `POST /api/cases/:id/conversations` - Add a conversation to a case
+
+### Surveys
+- `GET /api/surveys` - Get all surveys
+- `POST /api/surveys` - Create a new survey
+
+### Knowledge Base
+- `GET /api/knowledge` - Get all knowledge articles
+- `GET /api/knowledge?q=search` - Search knowledge articles
+- `POST /api/knowledge` - Create a new knowledge article
 
 ## Contributing
 
